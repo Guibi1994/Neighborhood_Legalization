@@ -22,7 +22,7 @@ The management of the informal city (or the attempt to manage it) is a multi-ins
 
 Thus, a good empirical strategy must deeply understand the institutional and legal processes behind the data: what the data represents and what does not. It is easy (for example) to make asumptions of what a piece of cadastral information means, but it's essential to stay away from these assumptions.
 
-[!alt text](https://github.com/Guibi1994/Neighborhood_Legalization/blob/main/04_figures/00_revision_general_1.png)  
+![alt text](https://github.com/Guibi1994/Neighborhood_Legalization/blob/main/04_figures/00_revision_general_1.png)  
 
 .
 ## 2.2. The model strategy
