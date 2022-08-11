@@ -2,4 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-.00_geographic_data
+*.ini
+*.gdb
+*.zip
+*.mxd
