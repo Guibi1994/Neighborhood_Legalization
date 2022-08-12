@@ -5,8 +5,10 @@ library(sf)
 library(dplyr)
 library(ggplot2)
 library(leaflet)
+library(grid)
 
 
+options(scipen = 100)
 
 # 1.1. Cargar información geográfica ----
 
@@ -43,7 +45,7 @@ g01_localidades <- readOGR(my_GBD, "s01_localidades") %>% as("sf") %>%
 
 ## 1.3. Barrios legalizados ----
 g02_legalizacion <- readOGR(my_GBD, "s00_legelizaciones_prelegalizaciones") %>% 
-  as("sf") %>% st_set_crs(4326)
+  as("sf") %>% st_set_crs(4326) %>% st_area()
 
 
 ## 1.4. Buffers de legalización ----
@@ -87,6 +89,21 @@ b00_informales <- st_join(g00_informales,g01_localidades) %>%
                         "1 km buffer")),
     areas = ifelse(franjas == "Legalization polygones","Legalization polygones",
                    "Other areas"))
+
+
+
+## 2.2. Resumen de legalizaciones y áreas legalizadas por año
+b02_legalizacioens <- g02_legalizacion %>% 
+  as.data.frame() %>% 
+  group_by(year = Legalizacion) %>% 
+  summarise(legalizaciones = n(),
+            area_legalizda = sum(Shape_Area, na.rm = T)) %>% 
+  as.data.frame() %>% filter(!is.na(year)) %>% 
+  # Acumulados 
+  mutate(legalizaciones_cum = cumsum(legalizaciones),
+         area_legalizda_cum = cumsum(area_legalizda)) %>% 
+  filter(year >= 1975)
+
 
 
 # 3. Reportes ----
@@ -160,10 +177,50 @@ b00_informales %>%
 ggsave("04_figures/plots/02_informal_settlements_by_buffer.png",h=6,w=6)
 
 
-## 3.3. Algo ----
+## 3.3. PLOT: Legalizations by year ----
 
 
+c1 <- grobTree(
+  textGrob("A--", x=0.425,  y=.97, hjust=0.5,rot = 0,
+           gp=gpar(col="red", fontsize=9, fontfamily = "serif"))) 
 
+c2 <- grobTree(
+  textGrob("B--", x=0.614,  y=.97, hjust=0.5,rot =0,
+           gp=gpar(col="red", fontsize=9, fontfamily = "serif"))) 
+
+c3 <- grobTree(
+  textGrob("--C", x=0.658,  y=.97, hjust=0.5,rot =0,
+           gp=gpar(col="red", fontsize=9, fontfamily = "serif"))) 
+
+c4 <- grobTree(
+  textGrob("D--", x=0.718,  y=.97, hjust=0.5,rot =0,
+           gp=gpar(col="red", fontsize=9, fontfamily = "serif"))) 
+
+
+b02_legalizacioens %>% ggplot(aes(year, legalizaciones_cum))+
+  geom_vline(xintercept = c(1994, 2003, 2004,2008, 2005,2012), 
+             lty = c(2,2,2,2,3,3), 
+             color = c("brown3","brown3","brown3","brown3","grey30","grey30"))+
+  geom_path(color = "cyan4")+
+  
+  labs(title = "Cumulative number of neighborhood legalizations (1975-2019)",
+       subtitle = "Bogotá, Colombia",
+       y = "Number of closed processes")+
+  
+  scale_y_continuous(labels = scales::comma,
+                     breaks = scales::pretty_breaks(n =6))+
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 8))+
+  theme_minimal()+
+  theme(text = element_text(family = "serif"),
+        legend.position = "bottom",
+        legend.title = element_blank()) +
+  annotation_custom(c1) +
+  annotation_custom(c2) +
+  annotation_custom(c3) +
+  annotation_custom(c4)
+
+
+ggsave("04_figures/plots/03_Cumulative_legalizations_by_year.png",h=6,w=8)
 
 
 
