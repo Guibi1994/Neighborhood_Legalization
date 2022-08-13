@@ -45,8 +45,7 @@ g01_localidades <- readOGR(my_GBD, "s01_localidades") %>% as("sf") %>%
 
 ## 1.3. Barrios legalizados ----
 g02_legalizacion <- readOGR(my_GBD, "s00_legelizaciones_prelegalizaciones") %>% 
-  as("sf") %>% st_set_crs(4326) %>% st_area()
-
+  as("sf") %>% st_set_crs(4326) 
 
 ## 1.4. Buffers de legalización ----
 g03_buffers <- readOGR(my_GBD, "s01_buffers_legalizaciones_simple") %>% 
