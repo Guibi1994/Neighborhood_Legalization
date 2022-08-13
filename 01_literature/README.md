@@ -11,6 +11,6 @@
 https://www.academia.edu/35416770/Evaluaci%C3%B3n_de_Impacto_de_Proyectos_de_Mejoramiento_Integral_de_Barrios
 
 
-
+https://revistas.utb.edu.co/index.php/economiayregion/article/view/153/147
 
 ## Otras referencias
