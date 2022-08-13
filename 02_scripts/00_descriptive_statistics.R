@@ -96,7 +96,7 @@ b02_legalizacioens <- g02_legalizacion %>%
   as.data.frame() %>% 
   group_by(year = Legalizacion) %>% 
   summarise(legalizaciones = n(),
-            area_legalizda = sum(Shape_Area, na.rm = T)) %>% 
+            area_legalizda = sum(Ha_area, na.rm = T)) %>% 
   as.data.frame() %>% filter(!is.na(year)) %>% 
   # Acumulados 
   mutate(legalizaciones_cum = cumsum(legalizaciones),
@@ -212,16 +212,57 @@ b02_legalizacioens %>% ggplot(aes(year, legalizaciones_cum))+
   theme_minimal()+
   theme(text = element_text(family = "serif"),
         legend.position = "bottom",
-        legend.title = element_blank()) +
-  annotation_custom(c1) +
-  annotation_custom(c2) +
-  annotation_custom(c3) +
-  annotation_custom(c4)
+        legend.title = element_blank())# +
+  # annotation_custom(c1) +
+  # annotation_custom(c2) +
+  # annotation_custom(c3) +
+  # annotation_custom(c4)
 
 
 ggsave("04_figures/plots/03_Cumulative_legalizations_by_year.png",h=6,w=8)
 
 
+### 3.4. 
+
+
+c1 <- grobTree(
+  textGrob("A--", x=0.425,  y=.97, hjust=0.5,rot = 0,
+           gp=gpar(col="red", fontsize=9, fontfamily = "serif"))) 
+
+c2 <- grobTree(
+  textGrob("B--", x=0.614,  y=.97, hjust=0.5,rot =0,
+           gp=gpar(col="red", fontsize=9, fontfamily = "serif"))) 
+
+c3 <- grobTree(
+  textGrob("--C", x=0.658,  y=.97, hjust=0.5,rot =0,
+           gp=gpar(col="red", fontsize=9, fontfamily = "serif"))) 
+
+c4 <- grobTree(
+  textGrob("D--", x=0.718,  y=.97, hjust=0.5,rot =0,
+           gp=gpar(col="red", fontsize=9, fontfamily = "serif"))) 
+
+
+b02_legalizacioens %>% ggplot(aes(year, area_legalizda_cum))+
+  geom_vline(xintercept = c(1994, 2003, 2004,2008, 2005,2012), 
+             lty = c(2,2,2,2,3,3), 
+             color = c("brown3","brown3","brown3","brown3","grey30","grey30"))+
+  geom_path(color = "cyan4")+
+  
+  labs(title = "Cumulative number of neighborhood legalizations (1975-2019)",
+       subtitle = "Bogotá, Colombia",
+       y = "Number of closed processes")+
+  
+  scale_y_continuous(labels = scales::comma,
+                     breaks = scales::pretty_breaks(n =6))+
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 8))+
+  theme_minimal()+
+  theme(text = element_text(family = "serif"),
+        legend.position = "bottom",
+        legend.title = element_blank())# +
+  # annotation_custom(c1) +
+  # annotation_custom(c2) +
+  # annotation_custom(c3) +
+  # annotation_custom(c4)
 
 
 
