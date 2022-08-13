@@ -59,8 +59,9 @@
 # Some other links to review
 
 1.  [Pedro Sant' Anna website](https://psantanna.com/research/)
-2.  
+2.  [Video: Pedro Sant' Anna: "Difference-in-Differences with Multiple Time Periods"](https://www.youtube.com/watch?v=VLviaylakAo&t=4131s)
 3.  [Video: Gary King, "Why Propensity Scores Should Not Be Used for Matching"](https://www.youtube.com/watch?v=rBv39pK1iEs&t=3032s)
-4.  [Gary King software to apply matching methods](https://gking.harvard.edu/publications/balance-sample-size-frontier-matching-methods-causal-inference)
-5.  [Kyle Butss pre-prints repo](https://arxiv.org/search/econ?searchtype=author&query=Butts%2C+K)
-6.  [Kyle Butss personal page](https://kylebutts.com/)
+4.  [Video: Susan Athey. "Synthetic Difference in Differences"](https://www.youtube.com/watch?v=r2DzGAigTl4&t=2917s)
+5.  [Gary King software to apply matching methods](https://gking.harvard.edu/publications/balance-sample-size-frontier-matching-methods-causal-inference)
+6.  [Kyle Butss pre-prints repo](https://arxiv.org/search/econ?searchtype=author&query=Butts%2C+K)
+7.  [Kyle Butss personal page](https://kylebutts.com/)
