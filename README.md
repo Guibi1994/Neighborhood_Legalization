@@ -7,7 +7,7 @@ This repo contains all data files realted to the paper "Slum recognition effects
 ## Information in the repo
 
 | Folder                                                                                                    | File | Description | Source |
-|-------------------------------|--------------|--------------|--------------|
+|-----------------------------------------------------------------------------------------------------------|------|-------------|--------|
 | [00_geographic_data](https://github.com/Guibi1994/Neighborhood_Legalization/tree/main/00_geographic_data) |      |             |        |
 |                                                                                                           |      |             |        |
 |                                                                                                           |      |             |        |

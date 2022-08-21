@@ -31,6 +31,9 @@ for (i in seq(2005,2019)) {
   rm(pr)
 }
 
+write.csv(a00_informales %>% filter(year <= 2019),
+          "00_data/001_ilegal_ocupations_Bogota_2005_2019.csv", row.names = F)
+
 g00_informales <- a00_informales %>% 
   mutate(ln = lon, lt = lat) %>% 
   st_as_sf(coords = c("ln","lt")) %>% 
@@ -96,7 +99,8 @@ b02_legalizacioens <- g02_legalizacion %>%
   as.data.frame() %>% 
   group_by(year = Legalizacion) %>% 
   summarise(legalizaciones = n(),
-            area_legalizda = sum(Ha_area, na.rm = T)) %>% 
+            area_legalizda = sum(Ha_area, na.rm = T),
+            area_promedio = mean(Ha_area, na.rm = T)) %>% 
   as.data.frame() %>% filter(!is.na(year)) %>% 
   # Acumulados 
   mutate(legalizaciones_cum = cumsum(legalizaciones),
@@ -129,8 +133,9 @@ b00_informales %>%
   scale_y_continuous(labels = scales::comma,
                      breaks = scales::pretty_breaks(n = 10))+
   scale_x_continuous(breaks = scales::pretty_breaks(n = 10))+
-  labs(y="Informal settlements", 
-       title = "Bogota's informal settlements growth by areas")+
+  labs(y="Informal occupations" 
+       #title = "Bogota's informal occupations growth by areas"
+       )+
   theme_minimal()+
   theme(text = element_text(family = "serif"),
         legend.position = "bottom",
@@ -165,7 +170,7 @@ b00_informales %>%
                      breaks = scales::pretty_breaks(n = 10))+
   scale_x_continuous(breaks = scales::pretty_breaks(n = 10))+
   labs(y="Informal settlements", 
-       title = "Bogota's informal settlements growth by buffers")+
+       title = "Bogota's informal occupations growth by buffers")+
   #geom_smooth()+
   theme_minimal()+
   theme(text = element_text(family = "serif"),
@@ -222,7 +227,7 @@ b02_legalizacioens %>% ggplot(aes(year, legalizaciones_cum))+
 ggsave("04_figures/plots/03_Cumulative_legalizations_by_year.png",h=6,w=8)
 
 
-### 3.4. 
+### 3.4. PLOT: Area legalizaed by year
 
 
 c1 <- grobTree(
@@ -267,8 +272,38 @@ b02_legalizacioens %>% ggplot(aes(year, area_legalizda_cum))+
 
 
 
+## 3.5. PLOT: Avereage legalization area by year ----
+n_fun <- function(x){
+  return(data.frame(y = mean(x)+0.3, label = paste0((
+    round(mean(x, na.rm = T),1)))))
+}
 
+g02_legalizacion %>% as.data.frame() %>% 
+  rename(year = Legalizacion) %>% 
+  mutate(periodo = 
+           case_when(year <= 1993~"1.a. Pre-POR era",
+                     year %in% c(1994:2004)~"1.b. POT era (fast-track)",
+                     year %in% c(2005:2006)~"2005-2006",
+                     year %in% c(2007:2008)~"2007-2008",
+                     year %in% c(2008:2010)~"2009-2010",
+                     year %in% c(2011:2012)~"2011-2012",
+                     year %in% c(2011:2014)~"2013-2014",
+                     year %in% c(2011:2016)~"2015-2016",
+                     year %in% c(2011:2018)~"2017-2018",
+                     year== 2019~"2019",
+                     T~"")) %>%
+  filter(year >= 1975) %>% 
+  ggplot(aes(as.factor(periodo),Ha_area))+
+  geom_boxplot(outlier.shape = NA)+
+  coord_cartesian(ylim = c(0,13))+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))+
+  stat_summary(fun.y = mean, color = "cyan3")+
+  stat_summary(fun.data = n_fun, geom = "text", color = "cyan4",
+               family = "serif",size =2.5)+
+  labs(title = "Legalization average area by year",x = "period", y ="area (Ha)")+
+  theme_minimal()+
+  theme(text = element_text(family = "serif"),
+        axis.text.x = element_text(angle = 45,hjust = 1))
 
-
-
+ggsave("04_figures/plots/04_variations_on_legaization_area_by_year.png",h=6,w=8)
 
