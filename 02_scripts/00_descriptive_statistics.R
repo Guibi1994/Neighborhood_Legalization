@@ -112,6 +112,7 @@ b02_legalizacioens <- g02_legalizacion %>%
 # 3. Reportes ----
 
 ## 3.1. PLOT: Iformality by area ----
+p1 <-
 b00_informales %>% 
   # Data
   filter(!is.na(Localidad)) %>% 
@@ -133,20 +134,21 @@ b00_informales %>%
   scale_y_continuous(labels = scales::comma,
                      breaks = scales::pretty_breaks(n = 10))+
   scale_x_continuous(breaks = scales::pretty_breaks(n = 10))+
-  labs(y="Informal occupations" 
-       #title = "Bogota's informal occupations growth by areas"
-       )+
+  labs(y="Informal occupations", 
+       title = "(A)")+
   theme_minimal()+
   theme(text = element_text(family = "serif"),
         legend.position = "bottom",
-        legend.title = element_blank()) +
+        legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5)) +
   guides(color = guide_legend(nrow = 1, byrow = TRUE))
 
-
+p1
 ggsave("04_figures/plots/01_informal_settlements_by_area.png", h =6, w = 6)
 
 
 ## 3.2. PLOT: Iformality by buffer ----
+p2 <- 
 b00_informales %>% 
   # Data
   filter(!is.na(Localidad)) %>% 
@@ -169,19 +171,30 @@ b00_informales %>%
   scale_y_continuous(labels = scales::comma,
                      breaks = scales::pretty_breaks(n = 10))+
   scale_x_continuous(breaks = scales::pretty_breaks(n = 10))+
-  labs(y="Informal settlements", 
-       title = "Bogota's informal occupations growth by buffers")+
+  labs(title = "(B)", y = "")+
   #geom_smooth()+
   theme_minimal()+
   theme(text = element_text(family = "serif"),
         legend.position = "bottom",
-        legend.title = element_blank()) +
-  guides(color = guide_legend(nrow = 2, byrow = TRUE))
+        legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5)) +
+  guides(color = guide_legend(nrow = 3, ncol = 2))
 
+p2
 ggsave("04_figures/plots/02_informal_settlements_by_buffer.png",h=6,w=6)
 
 
-## 3.3. PLOT: Legalizations by year ----
+
+## 3.3. PLOT: Gráfico doble
+
+p3 <- ggpubr::ggarrange(p1,p2)
+p3
+ggsave("04_figures/plots/00_informal_settlements_evolution.png",h=5,w=9)
+
+
+
+
+## 3.4. PLOT: Legalizations by year ----
 
 
 c1 <- grobTree(
@@ -202,13 +215,13 @@ c4 <- grobTree(
 
 
 b02_legalizacioens %>% ggplot(aes(year, legalizaciones_cum))+
-  geom_vline(xintercept = c(1994, 2003, 2004,2008, 2005,2012), 
-             lty = c(2,2,2,2,3,3), 
-             color = c("brown3","brown3","brown3","brown3","grey30","grey30"))+
+  geom_vline(xintercept = c(1994, 2003, 2004,2008), 
+             lty = c(2,2,2,2), 
+             color = c("brown3","brown3","brown3","brown3"))+
   geom_path(color = "cyan4")+
   
-  labs(title = "Cumulative number of neighborhood legalizations (1975-2019)",
-       subtitle = "Bogotá, Colombia",
+  labs(#title = "Cumulative number of neighborhood legalizations (1975-2019)",
+       #subtitle = "Bogotá, Colombia",
        y = "Number of closed processes")+
   
   scale_y_continuous(labels = scales::comma,
@@ -217,14 +230,14 @@ b02_legalizacioens %>% ggplot(aes(year, legalizaciones_cum))+
   theme_minimal()+
   theme(text = element_text(family = "serif"),
         legend.position = "bottom",
-        legend.title = element_blank())# +
-  # annotation_custom(c1) +
-  # annotation_custom(c2) +
-  # annotation_custom(c3) +
-  # annotation_custom(c4)
+        legend.title = element_blank()) +
+  annotation_custom(c1) +
+  annotation_custom(c2) +
+  annotation_custom(c3) +
+  annotation_custom(c4)
 
 
-ggsave("04_figures/plots/03_Cumulative_legalizations_by_year.png",h=6,w=8)
+ggsave("04_figures/plots/03_Cumulative_legalizations_by_year.png",h=5,w=8)
 
 
 ### 3.4. PLOT: Area legalizaed by year
