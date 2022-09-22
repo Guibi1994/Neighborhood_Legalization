@@ -294,8 +294,8 @@ n_fun <- function(x){
 g02_legalizacion %>% as.data.frame() %>% 
   rename(year = Legalizacion) %>% 
   mutate(periodo = 
-           case_when(year <= 1993~"1.a. Pre-POR era",
-                     year %in% c(1994:2004)~"1.b. POT era (fast-track)",
+           case_when(year <= 1993~"1.a. Pre-POR (1970-1993)",
+                     year %in% c(1994:2004)~"1.b. Fast-track (1994-2004)",
                      year %in% c(2005:2006)~"2005-2006",
                      year %in% c(2007:2008)~"2007-2008",
                      year %in% c(2008:2010)~"2009-2010",
@@ -313,7 +313,7 @@ g02_legalizacion %>% as.data.frame() %>%
   stat_summary(fun.y = mean, color = "cyan3")+
   stat_summary(fun.data = n_fun, geom = "text", color = "cyan4",
                family = "serif",size =2.5)+
-  labs(title = "Legalization average area by year",x = "period", y ="area (Ha)")+
+  labs(x = "Period", y ="area (Ha)")+
   theme_minimal()+
   theme(text = element_text(family = "serif"),
         axis.text.x = element_text(angle = 45,hjust = 1))
