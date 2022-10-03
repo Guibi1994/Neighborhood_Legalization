@@ -6,3 +6,4 @@
 *.gdb
 *.zip
 *.mxd
+00_geographic_data/*
