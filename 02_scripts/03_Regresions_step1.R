@@ -3,6 +3,7 @@ library(stargazer)
 library(dplyr)
 library(ggplot2)
 library(did)
+`%!in%` = Negate(`%in%`)
 
 # Cargar matriz inicial
 M0_raw <- readRDS("00_data/M01_hexagonal_matrix_simple.RDS")
@@ -24,80 +25,69 @@ M1_incial <- M0_raw %>%
          T2_treatment_dynamic = year-legalization_year,
          T2_treatment_dynamic = ifelse(is.na(T2_treatment_dynamic),0,
                                        T2_treatment_dynamic),
-         did_simple = T0_treated_group*T1_treated_period)
+         did_simple = T0_treated_group*T1_treated_period,
+         legalization_year = ifelse(is.na(legalization_year),0,legalization_year))
+
+table(M1_incial$legalization_year[M1_incial$year == 2005]) # Tratados por año
 
 
-# Tratados por año
-table(M1_incial$legalization_year[M1_incial$year == 2005])
+# Regresiones básicas
+
+
+
 
 M2_incial <- M1_incial %>% 
-  filter(legalization_year == 2008 | is.na(legalization_year)) %>% 
-  mutate(T1_treated_period = ifelse(year >= 2008,1,0),
+  filter(legalization_year == 2007 | is.na(legalization_year)) %>% 
+  mutate(T1_treated_period = ifelse(year >= 2009,1,0),
          did_simple = T0_treated_group*T1_treated_period)
 
+m2007 <- 
 
-
-
-stargazer(
-  lm(iligal_ocupations~T0_treated_group*T1_treated_period,M2_incial)
-  ,type = "text")
-
-stargazer(
-  lm(iligal_ocupations~T0_isin_treatment_group+T1_treatment_simple+did_simple,
-     M1_incial),
-  lm(iligal_ocupations~T1_treatment_simple+did_simple,
-     M1_incial),
-  lm(iligal_ocupations~T0_isin_treatment_group+did_simple,
-     M1_incial),
-  type = "text")
+lm(iligal_ocupations~T0_treated_group*T1_treated_period,M2_incial)
 
 
 
 
-table(M1_incial$T1_treatment_simple, M1_incial$T0_isin_treatment_group)
-table(M1_incial$T1_treatment_simple, M1_incial$did_simple)
+# Callaway Sant' Anna
+
+M2_prueba <- M1_incial 
+table(M2_prueba$legalization_year[M2_prueba$year == 2005])
+
+atts <- att_gt(yname = "iligal_ocupations", # LHS variable
+               tname = "year", # time variable
+               idname = "ID_hex", # id variable
+               gname = "legalization_year", # first treatment period variable
+               data = M2_prueba, # data
+               xformla = NULL, # no covariates
+               #xformla = ~ l_police, # with covariates
+               est_method = "ipw", # "dr" is doubly robust. "ipw" is inverse probability weighting. "reg" is regression
+               control_group = "notyettreated", # set the comparison group which is either "nevertreated" or "notyettreated" 
+               bstrap = TRUE, # if TRUE compute bootstrapped SE
+               biters = 10000, # number of bootstrap iterations
+               print_details = FALSE, # if TRUE, print detailed results
+               clustervars = "ID_hex", # cluster level
+               panel = TRUE) # whether the data is panel or repeated cross-sectional
+
+ggdid(atts) +
+  theme(text = element_text(family = "serif"))
 
 
+# Event-study
+agg_effects_es <- aggte(atts, type = "dynamic")
+summary(agg_effects_es)
+
+# Plot event-study coefficients
+ggdid(agg_effects_es) +
+  theme_minimal()+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10))+
+  theme(text = element_text(family = "serif"),
+        plot.title = element_text(hjust = 0.5),
+        legend.position = "bottom")
 
 
+summary(atts)
 
 
-
-sum(M1_incial$did_simple == M1_incial$T1_treatment_simple)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Some stuff 
-
-
-M1_incial %>% group_by(general_group, year) %>% 
-  summarise(iligal_ocupations = sum(iligal_ocupations)) %>% 
-  as.data.frame() %>% 
-  ggplot(aes(year, iligal_ocupations, color = general_group))+
-  geom_point()+
-  geom_path()
-
-M1_incial %>% group_by(neighborhood_order, year) %>% 
-  summarise(iligal_ocupations = sum(iligal_ocupations)) %>% 
-  as.data.frame() %>% 
-  ggplot(aes(year, iligal_ocupations, color = neighborhood_order))+
-  geom_point()+
-  geom_path()
-
-
-
-M1_incial$ID_hex[M1_incial$T0_isin_treatment_group ==1 & M1_incial$legalization_year == 2015]
 
 # Tratados Ejemplos 44555 47339 55257 73868 
 # Contorles Ejemplos 41386 44146 43366 

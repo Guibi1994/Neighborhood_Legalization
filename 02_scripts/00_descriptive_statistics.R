@@ -13,10 +13,10 @@ options(scipen = 100)
 
 # 1.1. Cargar información geográfica ----
 
-my_GBD = "00_geographic_data\\01_espacial_WGS1984.gdb"
+my_GBD = "00_geographic_data\\01_Bases_finales_WGS1984.gdb"
 
 
-## 1.1. Asentamientos inforamles ----
+`## 1.1. Asentamientos inforamles ----
 a00_informales <- data.frame(
   year = numeric(),
   coords.x1 = numeric(),
