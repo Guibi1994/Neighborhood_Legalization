@@ -321,3 +321,62 @@ g02_legalizacion %>% as.data.frame() %>%
 
 ggsave("04_figures/plots/04_variations_on_legaization_area_by_year.png",h=6,w=8)
 
+
+## 3.6. PLOT: Legalización procees times
+
+library(googlesheets4)
+
+
+Gs1_legalizations <- read_sheet("https://docs.google.com/spreadsheets/d/1lRfx89yIvWby9HpU2Lfd8k8FzoDiohmk7JyEO4zHij4/edit?usp=sharing") %>%
+  select(acto = ACTO_ADMIN, acto_num = NUMERO_ACT,
+         request_type = Origen,
+         legalizacion = `R Legalización`,
+         y1_IGACT_image = `Foto IGAC`,
+         y2_previus_admin_act = `Fecha Acto Adm anterior`,
+         y3_request = Solicitud, 
+         y4_initial_auto = `Auto de inicio`,
+         y5_visit = Visita,
+         y6_public_announcement = `Primer Anuncio Publico`) %>% 
+  mutate(across(legalizacion:y6_public_announcement,~as.Date(.))) %>% 
+  rowwise() %>% 
+  mutate(o1_all_dates_date = min(y2_previus_admin_act,y3_request, 
+                                 y4_initial_auto, y5_visit, y6_public_announcement,
+                                 na.rm = T),
+         o2_omit_previus_date = min(y3_request, 
+                                    y4_initial_auto, y5_visit, y6_public_announcement,
+                                    na.rm = T)) %>% 
+  ungroup() %>% as.data.frame() %>% 
+  # Time from minimun date
+  mutate(o1_all_dates_months = as.numeric((legalizacion-o1_all_dates_date)/30),
+         o2_omit_previus_months = as.numeric((legalizacion-o2_omit_previus_date)/30)) %>% 
+  # From every date
+  mutate(
+    `t1: Since settlement origin-IGAC` = as.numeric(legalizacion-y1_IGACT_image)/30,
+    `t2: Since previus projects` = as.numeric(legalizacion-y2_previus_admin_act)/30,
+    `t3: Since frist request` = as.numeric(legalizacion-y3_request)/30,
+    `t4: Since initial auto` = as.numeric(legalizacion-y4_initial_auto)/30,
+    `t5: Since first visit` = as.numeric(legalizacion-y5_visit)/30,
+    `t6: Since public announcement` = as.numeric(legalizacion-y6_public_announcement)/30) %>% 
+  # Final selecion and transformation
+  select(acto, legalizacion,15:20) %>% 
+  reshape2::melt(id.vars = c("acto", "legalizacion")) 
+
+
+
+
+Gs1_legalizations %>%
+  ggplot(aes(value,variable))+
+  geom_boxplot(lwd = 0.2, outlier.size = .5)+ coord_cartesian(xlim = c(0,400)) +
+  stat_summary(fun.y = mean, geom = "point",
+               shape = 20, size = 4, color = "brown2")+
+  #scale_y_reverse()+
+  
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 8))+
+  labs(x = "Months", y = "Time took to legalization")+
+  theme_minimal()+
+  theme(text = element_text(family = "serif"))
+
+ggsave("04_figures/plots/05_anticipation_by_starting_event.png",h=3,w=6)
+
+
+
