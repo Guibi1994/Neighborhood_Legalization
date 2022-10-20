@@ -8,3 +8,5 @@
 *.mxd
 00_geographic_data/*
 *.RDS
+*RDS
+00_data/M02_Hexonos_puntos_MIB_controles_y_adicionales.RDS
