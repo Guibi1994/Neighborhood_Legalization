@@ -8,9 +8,25 @@ library(stringr)
 `%!in%` = Negate(`%in%`)
 
 # 0. Cargar matriz inicial ----
-M0_raw <- readRDS("00_data/M01_hexagonal_matrix_simple.RDS") %>% 
+M0_raw <- readRDS("00_data/M01_hexagonal_matrix_simple.RDS") %>%
+  mutate(
+    # Tratamientos simples ----
+    ## 1.1. Dummy (time-invariant) si pertenece a grupo de control (legalizacion)
+    T0_treated_group = ifelse(is.na(legalization_year),0,1),
+    legalization_year = ifelse(is.na(legalization_year),0,legalization_year))
+
+
+names(M0_raw) %>% as.data.frame %>% write.csv("nombres.csv")
   merge(readRDS("00_data/Matrices_listas_por_componente/C02_Reasentamientos.RDS"),
         by = c("ID_hex", "year"))
+
+
+
+  
+  
+  
+  
+
 
 
 
@@ -28,6 +44,8 @@ M1_incial <- M0_raw %>%
     ## 1.3. Correción de año de legalización ----
     legalization_year = ifelse(is.na(legalization_year),0,legalization_year),
     
+    
+      
     ## 1.4. Corección de año de MIB ----
     )
 
@@ -130,6 +148,8 @@ table(pr$general_group[pr$first_monitored <2007],
 
 
 
+
+
 # 3. Preparacion regresiones ----
 #
 
@@ -219,17 +239,27 @@ for (i in 1:nrow(iterations)) {
 
 R3_event_sudy %>% mutate(event.time = 
                            case_when(
-                             control_group == "1st. neighbors"~event.time-0.25,
-                             control_group == "2nd. neighbors"~event.time-0.15,
-                             control_group == "3rd. neighbors"~event.time-0.05,
-                             control_group == "4th. neighbors"~event.time,
+                             control_group == "1st. neighbors"~event.time-0.35,
+                             control_group == "2nd. neighbors"~event.time-0.25,
+                             control_group == "3rd. neighbors"~event.time-0.15,
+                             control_group == "4th. neighbors"~event.time-.05,
                              control_group == "5th. neighbors"~event.time+0.1,
                              T~event.time+0.2)) %>% 
   ggplot(aes(event.time, estimate, color = control_group, group = control_group,fill =control_group,
              ymin = point.conf.low, ymax = point.conf.high))+
-  geom_point(size = .4)+geom_errorbar(width = 0)+
+  geom_point(size = 1)+geom_errorbar(width = 0)+
   geom_hline(yintercept = 0,lty = 2)+
-  scale_color_manual(values = c("grey70","grey50","grey30","black","cyan4","red"))+theme_minimal()
+  scale_color_manual(values = c("grey80","grey60","grey40","black","cyan4","brown2"))+
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 15))+
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 6))+
+  theme_minimal()+
+  labs(y = "", x = "Event time")+
+  theme(text = element_text(family = "serif", size = 20),
+        legend.position = "bottom", legend.title = element_blank(),
+        plot.background = element_blank(),
+        #panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
 
 
 
