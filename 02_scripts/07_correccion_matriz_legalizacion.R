@@ -8,7 +8,23 @@ library(stringr)
 `%!in%` = Negate(`%in%`)
 
 # 0. Cargar matriz inicial ----
-M0_raw <- readRDS("00_data/M01_hexagonal_matrix_simple.RDS") 
+M0_raw <- readRDS("00_data/M01_hexagonal_matrix_simple.RDS") %>% 
+  merge((read.csv("00_geographic_data/Distacina_legalizacion_MIB.csv", sep = ";") %>% 
+           select(ID_hex, starts_with("Dis")) %>%
+           mutate(across(1:3,~as.numeric(str_replace_all(.,",","."))))), by = "ID_hex")
+  
+  
+  
+  
+M1_MIB <- readRDS("00_data/Matrices_listas_por_componente/C01_MIB_y_PreMIB.RDS")
+
+names(M1_MIB) %>% write.csv("names.csv", row.names = F)
+
+
+
+
+
+
 
 
 pr <- M0_raw %>%
@@ -50,6 +66,7 @@ pr <- M0_raw %>%
     T1_LG05_legalization_type = legalization_type, 
     T1_LG06_legalization_act = legalization_act, 
     T1_LG07_legalization_own_code = legalization_own_code, 
+    T1_LG08_distance_towards_treated = Dis_legalizacion,
     # Monitoreo
     M00_always_monitored = always_monitored, 
     M01_total_monitoring = total_monitoring, 
