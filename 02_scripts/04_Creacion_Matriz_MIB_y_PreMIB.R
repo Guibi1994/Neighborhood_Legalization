@@ -87,6 +87,42 @@ m02_PreMIB <- m02_PreMIB %>%
 # 2. Matriz Agregada ----
 
 m03_MIB_y_PreMIB <- merge(m01_MIB,m02_PreMIB, by = c("ID_hex","year"))
-saveRDS(m03_MIB_y_PreMIB,"00_data/Matrices_listas_por_componente/C01_MIB_y_PreMIB.RDS")
+
+
+# 3. Arreglos finales y sintaxis
+
+
+Matriz_FINAL <- m03_MIB_y_PreMIB %>% 
+  merge((read.csv("00_geographic_data/00_Exportaciones_tabulares/Distacina_legalizacion_MIB.csv") %>% 
+                         select(ID_hex, starts_with("Dis"))), by = "ID_hex")
+
+
+Matriz_FINAL <- Matriz_FINAL %>% 
+  mutate(T2_MIB00_was_treated = MIB02_TI_dummy_treatment_group,
+         T2_MIB01_MIB_year = ifelse(is.na(MIB00_first_time_treated),0,MIB00_first_time_treated), 
+         T2_MIB02_pre_MIB_year =PreMIB00_first_time_Pre_treated,
+         T2_MIB03_general_group = ifelse(T2_MIB00_was_treated == 1,"tratados","no tratados"),
+         T2_MIB04_neighborhood_order= 
+           case_when(
+             between(Dis_MIB,0,80)~"1st neighborhood",
+             between(Dis_MIB,80,140)~"2nd neighborhood",
+             between(Dis_MIB,140,210)~"3rd neighborhood",
+             between(Dis_MIB,210,280)~"4th neighborhood",
+             T~"outsider"),
+         T2_MIB05_times_treated=MIB01_times_treted,
+         T2_MIB06_times_PreTreated=PreMIB01_times_Pre_treted,
+         T2_MIB07_was_pre_teated=PreMIB02_TI_dummy_Pre_treatment_group,
+         T2_MIB08_was_treated_dynamic=MIB03_TV_dummy_treatment_group,
+         T2_MIB09_was_PreTreated_dynamic=PreMIB03_TV_dummy_Pre_treatment_group,
+         T2_MIB10_distance_towards_treated = Dis_MIB,
+         
+         T2_MIB04_neighborhood_order = ifelse(T2_MIB03_general_group != "no tratados",
+                                     "treated",T2_MIB04_neighborhood_order)) %>% 
+  select(ID_hex, year, starts_with("T2_"))
+  
+  
+
+
+saveRDS(Matriz_FINAL,"00_data/Matrices_listas_por_componente/C01_MIB_y_PreMIB.RDS")
 
 

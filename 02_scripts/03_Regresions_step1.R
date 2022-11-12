@@ -17,8 +17,8 @@ M0_raw <- readRDS("00_data/M01_hexagonal_matrix_simple.RDS") %>%
 
 
 names(M0_raw) %>% as.data.frame %>% write.csv("nombres.csv")
-  merge(readRDS("00_data/Matrices_listas_por_componente/C02_Reasentamientos.RDS"),
-        by = c("ID_hex", "year"))
+merge(readRDS("00_data/Matrices_listas_por_componente/C02_Reasentamientos.RDS"),
+      by = c("ID_hex", "year"))
 
 
 
