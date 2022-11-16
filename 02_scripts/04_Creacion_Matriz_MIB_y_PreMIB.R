@@ -14,8 +14,9 @@ a00_raw <-  readRDS("00_data/M02_Hexonos_puntos_MIB_controles_y_adicionales.RDS"
 
 m01_MIB <- a00_raw %>% 
   select(ID_hex, starts_with(c("MIB"))) %>%
+  # Agregar años en los que no hay MIB
   mutate(MIB_2005 = 0,MIB_2006 = 0,MIB_2007 = 0,MIB_2017 = 0,
-         MIB_2018 = 0,MIB_2019 = 0) %>% 
+         MIB_2019 = 0) %>% 
   reshape2::melt(id.vars = "ID_hex", value.name = "MIB_treated_period",
                  variable.name = "year") %>% 
   mutate(year = as.numeric(str_sub(year,-4,-1))) %>% 
@@ -89,6 +90,14 @@ m02_PreMIB <- m02_PreMIB %>%
 m03_MIB_y_PreMIB <- merge(m01_MIB,m02_PreMIB, by = c("ID_hex","year"))
 
 
+
+
+
+
+
+
+
+
 # 3. Arreglos finales y sintaxis
 
 
@@ -125,4 +134,7 @@ Matriz_FINAL <- Matriz_FINAL %>%
 
 saveRDS(Matriz_FINAL,"00_data/Matrices_listas_por_componente/C01_MIB_y_PreMIB.RDS")
 
+
+Matriz_FINAL 
+ID_hex==188054
 

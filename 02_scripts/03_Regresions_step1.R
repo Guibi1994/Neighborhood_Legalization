@@ -21,14 +21,7 @@ merge(readRDS("00_data/Matrices_listas_por_componente/C02_Reasentamientos.RDS"),
       by = c("ID_hex", "year"))
 
 
-
   
-  
-  
-  
-
-
-
 
 # 1. Adicion de varaible ----
 M1_incial <- M0_raw %>% 
@@ -42,89 +35,10 @@ M1_incial <- M0_raw %>%
     
     # Arreglos años de tratamientos
     ## 1.3. Correción de año de legalización ----
-    legalization_year = ifelse(is.na(legalization_year),0,legalization_year),
-    
-    
-      
-    ## 1.4. Corección de año de MIB ----
-    )
+    legalization_year = ifelse(is.na(legalization_year),0,legalization_year))
 
 
 
-# 2. Tablas de muestras ----
-
-## 2.1. Distribución de observaciones por monitorio ----
-
-mr1 <- M1_incial %>% 
-  mutate(
-    # Grupos experimetnales
-    general_group = case_when(
-      general_group =="tratados despues de 2005"~as.character(legalization_year),
-      general_group == "no tratados"~"Never trated",
-      T~"Treated before 2005"),
-    
-    # Grupos de monitoreo
-    monitoring_group = 
-      case_when(total_monitoring == 15~"I. Always",
-                total_monitoring >0~"II. Not always",
-                T~"III. Never"))
-
-pr <-mr1 %>% group_by(ID_hex) %>% 
-  summarise(across(general_group:monitoring_group,~first(.))) %>% 
-  as.data.frame() %>% 
-  group_by(general_group, monitoring_group) %>% 
-  summarise(n = n()) %>% 
-  as.data.frame() %>% 
-  reshape2::dcast(general_group~monitoring_group, value.var = "n") %>% 
-  rename(`Group` = general_group)  %>% 
-  rowwise() %>% 
-  mutate(Total = sum(c(`I. Always`,`II. Not always`,`III. Never`), na.rm = T))
-  
-
-rbind(
-  pr %>% mutate(across(2:4,~ifelse(is.na(.),"-",as.character(.)))),
-  pr %>% 
-    mutate(across(2:4,~ifelse(is.na(.),"-",
-                              paste0("(",round((100*./Total),1)," %)"))))) %>% 
-  as.data.frame() %>% 
-  arrange(Group) %>% 
-  kbl(format = "latex", booktabs = T, align = "c", 
-    caption = "Distribution observations of tratment status by monitoring group") %>% 
-  add_header_above(c("", "Monitoring frequency group"=3),italic = T, 
-                   align = "c") %>% 
-  pack_rows("Pre-court intervention",1,8) %>%
-  pack_rows("Post-court intervention",9,28, hline_before =  T) %>%
-  pack_rows(" ",29,32, hline_before =  T) %>%
-  collapse_rows(columns = c(1,5), latex_hline = "none")
-    
-  
-
-## 2.2. Distribucuón de Never-treteted por monitoreo ----
-
-pr <- mr1 %>% filter(neighborhood_order != "treated") %>% 
-  select(ID_hex,monitoring_group, neighborhood_order) %>% 
-  group_by(ID_hex) %>% 
-  summarise(across(1:2,~first(.))) %>% 
-  as.data.frame() %>% 
-  group_by(monitoring_group, neighborhood_order) %>% 
-  summarise(n = n()) %>% 
-  reshape2::dcast(neighborhood_order~monitoring_group, value.var = "n") %>% 
-  rename(`Control group` = neighborhood_order) %>% 
-  rowwise() %>% 
-  mutate(Total = sum(c(`I. Always`,`II. Not always`,`III. Never`), na.rm = T))
-
-
-rbind(
-  pr %>% mutate(across(2:4,~ifelse(is.na(.),"-",as.character(.)))),
-  pr %>% 
-    mutate(across(2:4,~ifelse(is.na(.),"-",
-                              paste0("(",round((100*./Total),1)," %)"))))) %>% 
-  as.data.frame() %>% arrange(`Control group`) %>% 
-  kbl(format = "latex", booktabs = T, align = "c", 
-      caption = "Never trated units' distribution by\n monitoring group") %>% 
-  add_header_above(c("", "Monitoring frequency group"=3),italic = T, 
-                   align = "c") %>% 
-  collapse_rows(columns = c(1,5), latex_hline = "none")
 
 
 ## 2.3. Monitored firs in 2005 y monitoring time ----
@@ -151,7 +65,6 @@ table(pr$general_group[pr$first_monitored <2007],
 
 
 # 3. Preparacion regresiones ----
-#
 
 ## 3.1. Base de iteraciones ----
 iterations <-
@@ -162,17 +75,17 @@ iterations <-
       # "RES03_ingresos_count","RES04_ingresos_m2"
       ),
     # Control groups
-    c("treated,1st neighborhood,2nd neighborhood,3rd neighborhood,4th neighborhood,outsider",
-      "treated,1st neighborhood","treated,2nd neighborhood",
-      "treated,3rd neighborhood","treated,4th neighborhood","treated,outsider")) %>% 
+    c("Treated,1st neighborhood,2nd neighborhood,3rd neighborhood,4th neighborhood,5th neighborhood",
+      "Treated,1st neighborhood","Treated,2nd neighborhood",
+      "Treated,3rd neighborhood","Treated,4th neighborhood","Treated,5th neighborhood")) %>% 
   # Etiquetas de grupos de control
   mutate(across(1:2,~as.character(.)),
          control = case_when(
-           str_detect(Var2,"^treated,1st neighborhood,2")==T~"All controls",
-           str_detect(Var2,"^treated,1st neighborhood$")==T~"1st. neighbors",
-           str_detect(Var2,"^treated,2")==T~"2nd. neighbors",
-           str_detect(Var2,"^treated,3")==T~"3rd. neighbors",
-           str_detect(Var2,"^treated,4")==T~"4th. neighbors", 
+           str_detect(Var2,"^Treated,1st neighborhood,2")==T~"All controls",
+           str_detect(Var2,"^Treated,1st neighborhood$")==T~"1st. neighbors",
+           str_detect(Var2,"^Treated,2")==T~"2nd. neighbors",
+           str_detect(Var2,"^Treated,3")==T~"3rd. neighbors",
+           str_detect(Var2,"^Treated,4")==T~"4th. neighbors", 
            T~"5th. neighbors"))
   
 # 3.2. Bases de resultados
@@ -237,7 +150,9 @@ for (i in 1:nrow(iterations)) {
 
 
 
-R3_event_sudy %>% mutate(event.time = 
+R3_event_sudy %>% 
+  filter(outcome == "O01_ILO00_iligal_ocupations") %>% 
+  mutate(event.time = 
                            case_when(
                              control_group == "1st. neighbors"~event.time-0.35,
                              control_group == "2nd. neighbors"~event.time-0.25,
@@ -247,6 +162,7 @@ R3_event_sudy %>% mutate(event.time =
                              T~event.time+0.2)) %>% 
   ggplot(aes(event.time, estimate, color = control_group, group = control_group,fill =control_group,
              ymin = point.conf.low, ymax = point.conf.high))+
+  coord_cartesian(xlim = c(-5.8,10.8))+
   geom_point(size = 1)+geom_errorbar(width = 0)+
   geom_hline(yintercept = 0,lty = 2)+
   scale_color_manual(values = c("grey80","grey60","grey40","black","cyan4","brown2"))+
@@ -254,7 +170,7 @@ R3_event_sudy %>% mutate(event.time =
   scale_y_continuous(breaks = scales::pretty_breaks(n = 6))+
   theme_minimal()+
   labs(y = "", x = "Event time")+
-  theme(text = element_text(family = "serif", size = 20),
+  theme(text = element_text(family = "serif", size = 12),
         legend.position = "bottom", legend.title = element_blank(),
         plot.background = element_blank(),
         #panel.grid.major = element_blank(),
