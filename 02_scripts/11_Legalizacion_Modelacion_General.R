@@ -260,7 +260,9 @@ for (i in 1:nrow(iterations_placebos)) {
     ##### I.a. Outcome:
     yname = iterations_placebos[i,1],
     ##### I.b. DATA y Grupos de controles:
-    data = a1_always_monitored,
+    data = a1_always_monitored %>% 
+      filter(T1_LG04_neighborhood_order %in%
+               c(str_split(iterations[i,2],pattern = "\\,") %>% unlist())),
     ##### I.c. Other parameters:
     tname = "year", idname = "ID_hex", gname = iterations_placebos[i,2], 
     xformla = NULL, est_method = "dr", control_group = "nevertreated",
@@ -316,7 +318,9 @@ for (i in 1:nrow(iterations_placebos)) {
     #### I.a. Outcome:
     yname = iterations_placebos[i,1],
     #### I.b. DATA y Grupos de controles:
-    data = a1_always_monitored,
+    data = a1_always_monitored %>% 
+      filter(T1_LG04_neighborhood_order %in%
+               c(str_split(iterations[i,2],pattern = "\\,") %>% unlist())),
     #### I.c. Other parameters:
     tname = "year", idname = "ID_hex", gname = iterations_placebos[i,2], 
     xformla = ~PC1+PC2+PC3+PC4+PC5,
@@ -389,166 +393,6 @@ saveRDS(M2_always_monitored_placebos, "03_results/R01leg_Always_monitored_no_ant
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-
-
-
-# ZONA DE PRUBAS ----
-
-## Ferreteria de loops ----
-R1_simple <- data.frame()
-R2_group <- data.frame()
-R3_event_sudy <- data.frame()
-
-{
-  R1_simple <- data.frame()
-  R2_group <- data.frame()
-  R3_event_sudy <- data.frame()
-  
-i <- 5
-m1 <- att_gt(
-  #### I.a. Outcome:
-  yname = iterations[i,1],
-  #### I.b. DATA y Grupos de controles:
-  data = M2_prueba %>% 
-    filter(T1_LG04_neighborhood_order %in%
-             c(str_split(iterations[i,2],pattern = "\\,") %>% unlist())),
-  #### I.c. Other parameters:
-  tname = "year", idname = "ID_hex", gname = "T1_LG01_legalization_year", 
-  xformla = ~PC1+PC2+PC3+PC4+PC5,
-  est_method = "dr", control_group = "nevertreated",
-  bstrap = TRUE, biters = 10000, print_details = FALSE, 
-  clustervars = "ID_hex", panel = TRUE, cores = 8)
-
-
-## III.a. Simples
-tryCatch({
-R1_simple <- rbind(
-  R1_simple,did::tidy(aggte(m1, type = "simple", na.rm = T)) %>% 
-    mutate(outcome = iterations[i,1],
-           control_group = iterations[i,3],
-           covariates = "conditional",sample = "always monitored",
-           Observations = m1[[8]]))},
-error = function(e){print("OJO! no se imputo base simple :(")}
-)
-## III.b. Grupos
-tryCatch({
-R2_group <- rbind(
-  R2_group,did::tidy(aggte(m1, type = "group", na.rm = T)) %>% 
-    mutate(outcome = iterations[i,1],
-           control_group = iterations[i,3],
-           covariates = "conditional",sample = "always monitored",
-           Observations = m1[[8]]))},
-error = function(e){print("OJO! no se imputo base por grupos :(")}
-)
-#### III. Event Study
-tryCatch({
-R3_event_sudy <- rbind(
-  R3_event_sudy,did::tidy(aggte(m1, type = "dynamic", na.rm = T)) %>% 
-    mutate(outcome = iterations[i,1],
-           control_group = iterations[i,3],
-           covariates = "conditional",sample = "always monitored",
-           Observations = m1[[8]]))},
-error = function(e){print("OJO! no se imputo base por eventos :(")}
-)
-}
-
-
-
-
-
-## Alforja de gráficas ----
-
-
-
-
-
-
-{
-pr <- sample(outcomes,1,replace = T)
-#pr <- outcomes[1]
-M1_monitored_unconditional[[1]] %>% filter(outcome == pr) 
-ggpubr::ggarrange(
-  M1_monitored_unconditional[[1]] %>% 
-  filter(outcome == pr) %>% 
-  ggplot(aes(control_group, estimate, ymin = estimate+(std.error*1.96), 
-             ymax = estimate-(std.error*1.96)))+
-  labs(title = "General effects",x="Neighborhhod order",y="")+
-  geom_errorbar(width = 0, color = "grey60")+
-  geom_point(color = "brown2")+
-  geom_hline(yintercept = 0, lty =2, color = "red")+
-  theme_minimal()+
-  theme(text = element_text(size = 12, family = "serif"),
-        plot.title = element_text(hjust = 0.5)),
-
-
-
-  M1_monitored_unconditional[[3]] %>% 
-  filter(outcome == pr) %>% 
-  mutate(event.time = 
-           case_when(
-             control_group == "1st. neighbors"~event.time-0.35,
-             control_group == "2nd. neighbors"~event.time-0.25,
-             control_group == "3rd. neighbors"~event.time-0.15,
-             control_group == "4th. neighbors"~event.time-.05,
-             control_group == "5th. neighbors"~event.time+0.1,
-             T~event.time+0.2)) %>% 
-  ggplot(aes(event.time, estimate, color = control_group, group = control_group,fill =control_group,
-             ymin = estimate-(std.error*1.96), ymax = estimate+(std.error*1.96)))+
-  coord_cartesian(xlim = c(-4.8,10.8))+
-  geom_point(size = 1)+geom_errorbar(width = 0)+
-  geom_hline(yintercept = 0,lty = 2)+
-  labs(title = "Event study effects")+
-  scale_color_manual(values = c("grey80","grey60","grey40","black","cyan4","brown2"))+
-  scale_x_continuous(breaks = scales::pretty_breaks(n = 15))+
-  scale_y_continuous(breaks = scales::pretty_breaks(n = 6))+
-  theme_minimal()+
-  labs(y = "", x = "Event time")+
-  theme(text = element_text(family = "serif", size = 12),
-        plot.title = element_text(hjust = 0.5),
-        legend.position = "bottom", legend.title = element_blank(),
-        plot.background = element_blank(),
-        #panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())) %>% 
-  annotate_figure(top =  text_grob(
-    paste0(pr,"\n"), face = "bold",family = "serif", size = 14))
-}
-
-
-
-
-
-
-
-
-pr <- sample(outcomes,1,replace = T)
-pr <- outcomes[27]
-#pr <- outcomes[1]
-R1_simple %>% filter(outcome == pr) 
-R1_simple %>% 
-  filter(outcome == pr) %>% 
-  ggplot(aes(placebo, estimate, ymin = estimate+(std.error*1.96), 
-             ymax = estimate-(std.error*1.96),
-             color = covariates, group = covariates))+
-  labs(title = pr,x="Neighborhhod order",y="", color = "")+
-  geom_errorbar(width = 0,position=position_dodge(width = 0.3))+
-  geom_point(position=position_dodge(width = 0.3))+
-  geom_hline(yintercept = 0, lty =2, color = "black")+
-  scale_color_manual(values = c("brown3","cyan4"))+
-  theme_minimal()+
-  theme(text = element_text(size = 12, family = "serif"),
-        plot.title = element_text(hjust = 0.5),
-        legend.position = "bottom")
-
-
-
-
-
-
-data.frame(
-  group_by()
-)
 
 
 

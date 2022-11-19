@@ -46,7 +46,7 @@ outcomes <- names(a0_Matriz_inicial) %>% as.data.frame() %>%
   mutate(outcomes = str_detect(.,"^O")) %>% filter(outcomes ==T) %>% 
   select(1) %>% as.vector() %>% unlist()
 
-write.csv(outcomes, "00_data/004_ouctome_names.csv", row.names = F)
+
 
 
 
@@ -84,10 +84,10 @@ iterations_placebos <-
       "TP2_MIB_3rd_neighborhood","TP2_MIB_4th_neighborhood")) %>% 
   
   mutate(placebo = case_when(
-    str_detect(Var2,"^TP1_leg_1")==T~"1st Placebo",
-    str_detect(Var2,"^TP1_leg_2")==T~"2nd Placebo",
-    str_detect(Var2,"^TP1_leg_3")==T~"3rd Placebo",
-    str_detect(Var2,"^TP1_leg_4")==T~"4th Placebo",
+    str_detect(Var2,"^TP2_MIB_1")==T~"1st Placebo",
+    str_detect(Var2,"^TP2_MIB_2")==T~"2nd Placebo",
+    str_detect(Var2,"^TP2_MIB_3")==T~"3rd Placebo",
+    str_detect(Var2,"^TP2_MIB_4")==T~"4th Placebo",
     T~"Standard model")) %>% 
   mutate(across(1:ncol(.),~as.character(.))) %>% 
   as.data.frame()
@@ -230,7 +230,7 @@ for (i in 1:nrow(iterations)) {
 
 ## 1.4. Agrupa en una lista única ----
 M1_always_monitored <- 
-  list("Models group name" = "legalization: Always monitored and no anticipation",
+  list("Models group name" = "MIB: Always monitored and no anticipation",
        "Simple"=R1_simple, "Gruop" = R2_group,"Events"= R3_event_sudy)
 saveRDS(M1_always_monitored, "03_results/R02MIB_Always_monitored_no_anticipation.RDS")
 
@@ -367,6 +367,6 @@ for (i in 1:nrow(iterations_placebos)) {
 
 ## 2.4. Agrupa en una lista única ----
 M2_always_monitored_placebos <- 
-  list("Models group name" = "legalization: Always monitored and no anticipation",
+  list("Models group name" = "MIB: Always monitored and no anticipation",
        "Simple"=R1_simple, "Gruop" = R2_group,"Events"= R3_event_sudy)
 saveRDS(M2_always_monitored_placebos, "03_results/R02MIB_Always_monitored_no_anticipation_placebos.RDS")
