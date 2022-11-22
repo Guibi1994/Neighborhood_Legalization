@@ -8,6 +8,8 @@ library(ggplot2)
 library(kableExtra)
 library(stringr)
 options(scipen = 100)
+`%!in%` = Negate(`%in%`)
+
 
 ## 0.2. Function for pvalues ----
 pval <- function(base) {
@@ -115,6 +117,19 @@ R1_leg %>%
            footnote_as_chunk = T, threeparttable = T)
   
 
+### 1.4.5. Just conditional results ----
+R1_leg[,c(1,seq(3,13,2))] %>% 
+  rename(`1st`=2,`2nd`=3,`3rd`=4,`4th`=5,`5th`=6,`All`=7) %>% 
+  kbl(caption = "Legalization effects over main outcomes (adding PCA controls)",
+      format = "latex",
+      booktabs = T, align = c("l",rep("c",6))) %>% 
+  collapse_rows(1, latex_hline = "none") %>% 
+  add_header_above(c("", "Neighborhood orders" =5), italic = T) %>% 
+  pack_rows("Informal Market",1,10) %>% 
+  pack_rows("Formal Market - Overall",11,20,hline_before = F) %>% 
+  pack_rows(" ",21,24,hline_before = T) %>% 
+  footnote(general = pnotes, general_title = "Notes: ", title_format = "bold",
+           footnote_as_chunk = T, threeparttable = T)
   
   
   #/////////////////////////////////////////////////////////////////////////////
@@ -174,9 +189,141 @@ R2_MIB %>%
   footnote(general = pnotes, general_title = "Notes: ", title_format = "bold",
            footnote_as_chunk = T, threeparttable = T)
 
+### 1.2.5. Just conditional resutls ----
+R2_MIB[,c(1,seq(3,13,2))] %>% 
+  rename(`1st`=2,`2nd`=3,`3rd`=4,`4th`=5,`5th`=6,`All`=7) %>% 
+  kbl(caption = "Legalization effects over main outcomes (adding PCA controls)",
+      format = "latex",
+      booktabs = T, align = c("l",rep("c",6))) %>% 
+  collapse_rows(1, latex_hline = "none") %>% 
+  add_header_above(c("", "Neighborhood orders" =5), italic = T) %>% 
+  pack_rows("Informal Market",1,10) %>% 
+  pack_rows("Formal Market - Overall",11,20,hline_before = F) %>% 
+  pack_rows(" ",21,24,hline_before = T) %>% 
+  footnote(general = pnotes, general_title = "Notes: ", title_format = "bold",
+           footnote_as_chunk = T, threeparttable = T)
+
+
+#/////////////////////////////////////////////////////////////////////////////
+
+
+# 2. Detalle sobre USOS -----
+## 2.1. Legalización ----
+### 2.1.1. Extraer resultados ----
+R1_leg <- a1_leg_general[[2]] %>% pval() %>% 
+  select(2,15,8,9,10) %>% 
+  reshape2::melt(id.vars = c("outcome","control_group","covariates")) %>%
+  mutate(covariates = ifelse(covariates=="inconditional","(A)","(B)")) %>% 
+  reshape2::dcast(outcome+variable~control_group+covariates, value.var = "value") %>% 
+  filter(str_detect(outcome,"dummy")==F) %>% 
+  merge(outcomes,by = "outcome",all.x=T) %>% 
+  # Filtara ourcomes de interes
+  filter(grupo %!in% c("Informal","Formal")) %>% 
+  arrange(orden) %>% 
+  select(15,everything()) %>% select(-2,-3,-16,-17) %>% 
+  ## Quitar Empty lots
+  filter(str_detect(Variable, "Empty")==F) 
+
+### 2.1.2. Cambiar nombres ----
+names(R1_leg) <- c("Variable",str_extract(
+  names(R1_leg)[2:ncol(R1_leg)],pattern = "\\_\\D{3}") %>% 
+    str_remove(.,"_"))
+
+### 2.1.3. Anexar info adicional ----
+R1_leg <- 
+  rbind(R1_leg,
+        data.frame(
+          var1 = c("Variable",rep(c("(A)","(B)"),6)),
+          var2  =  c("PCA controls",rep(c("No","Yes"),6))) %>% 
+          t() %>% as.data.frame() %>% 
+          janitor::row_to_names(1) %>%
+          as.data.frame()) %>% 
+  # LEGALIZACION complementos
+  rbind(model_complements_leg) 
+
+rownames(R1_leg) <-NULL
+
+### 2.1.4. LaTeX ----
+R1_leg %>% 
+  kbl(caption = "Legalization program general effects over legal construction by land uses",
+      booktabs = T, align = c("l",sample("c",12,T)),
+      format = "latex") %>% 
+  kable_styling(font_size = 4) %>% 
+  collapse_rows(1, latex_hline = "none") %>% 
+  add_header_above(c("","1st neighbours"=2,"2nd neighbours"=2,"3rd neighbours"=2,
+                     "4th neighbours"=2,"5th neighbours"=2,"All neighbours"=2),
+                   italic = T) %>% 
+  pack_rows("Residential:",1,6,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Comercial:",7,12,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Offices:",13,18,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Industrial:",19,24,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Warehouses:",25,30,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Facilities:",31,36,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Others:",37,42,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows(" ",43,46,hline_before = T) %>% 
+  kableExtra::landscape() %>% 
+  footnote(general = pnotes, general_title = "Notes: ", title_format = "bold",
+           footnote_as_chunk = T, threeparttable = T)
 
 
 
+
+## 2.2. MIB ----
+### 2.2.1. Extraer resultados ----
+R2_MIB <- a2_MIB_general[[2]] %>% pval() %>% 
+  select(2,15,8,9,10) %>% 
+  reshape2::melt(id.vars = c("outcome","control_group","covariates")) %>%
+  mutate(covariates = ifelse(covariates=="inconditional","(A)","(B)")) %>% 
+  reshape2::dcast(outcome+variable~control_group+covariates, value.var = "value") %>% 
+  filter(str_detect(outcome,"dummy")==F) %>% 
+  merge(outcomes,by = "outcome",all.x=T) %>% 
+  # Filtara ourcomes de interes
+  filter(grupo %!in% c("Informal","Formal")) %>% 
+  arrange(orden) %>% 
+  select(15,everything()) %>% select(-2,-3,-16,-17) %>% 
+  ## Quitar Empty lots
+  filter(str_detect(Variable, "Empty")==F) 
+
+### 2.2.2. Cambiar nombres ----
+names(R2_MIB) <- c("Variable",str_extract(
+  names(R2_MIB)[2:ncol(R2_MIB)],pattern = "\\_\\D{3}") %>% 
+    str_remove(.,"_"))
+
+### 2.2.3. Anexar info adicional ----
+R2_MIB <- 
+  rbind(R2_MIB,
+        data.frame(
+          var1 = c("Variable",rep(c("(A)","(B)"),6)),
+          var2  =  c("PCA controls",rep(c("No","Yes"),6))) %>% 
+          t() %>% as.data.frame() %>% 
+          janitor::row_to_names(1) %>%
+          as.data.frame()) %>% 
+  # LEGALIZACION complementos
+  rbind(model_complements_MIB) 
+
+rownames(R2_MIB) <-NULL
+
+### 2.2.4. LaTeX ----
+R2_MIB %>% 
+  kbl(caption = "MIB program general effects over legal construction by land uses",
+      booktabs = T, align = c("l",sample("c",12,T)),
+      format = "latex") %>% 
+  kable_styling(font_size = 4) %>% 
+  collapse_rows(1, latex_hline = "none") %>% 
+  add_header_above(c("","1st neighbours"=2,"2nd neighbours"=2,"3rd neighbours"=2,
+                     "4th neighbours"=2,"5th neighbours"=2,"All neighbours"=2),
+                   italic = T) %>% 
+  pack_rows("Residential:",1,6,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Comercial:",7,12,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Offices:",13,18,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Industrial:",19,24,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Warehouses:",25,30,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Facilities:",31,36,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows("Others:",37,42,hline_before = F, bold = F,italic = T, underline = T) %>%
+  pack_rows(" ",43,46,hline_before = T) %>% 
+  kableExtra::landscape() %>% 
+  footnote(general = pnotes, general_title = "Notes: ", title_format = "bold",
+           footnote_as_chunk = T, threeparttable = T)
 
 
 

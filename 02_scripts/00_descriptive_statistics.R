@@ -35,6 +35,8 @@ for (i in seq(2005,2019)) {
 write.csv(a00_informales %>% filter(year <= 2019),
           "00_data/001_ilegal_ocupations_Bogota_2005_2019.csv", row.names = F)
 
+
+a00_informales <- read.csv("00_data/001_ilegal_ocupations_Bogota_2005_2019.csv")
 g00_informales <- a00_informales %>% 
   mutate(ln = lon, lt = lat) %>% 
   st_as_sf(coords = c("ln","lt")) %>% 
