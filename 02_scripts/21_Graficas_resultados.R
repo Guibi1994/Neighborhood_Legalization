@@ -4,6 +4,7 @@ library(dplyr)
 library(ggplot2)
 library(gridExtra)
 library(egg)
+library(stringr)
 pval <- function(base) {
   base <- base %>% 
     mutate(pval = round(exp(-0.717*(estimate/std.error)-0.416*(estimate/std.error)^2),4),
@@ -241,7 +242,7 @@ p1 <- base %>%
   ggplot(aes(control_group, estimate, ymin = estimate+(std.error*1.96), 
              ymax = estimate-(std.error*1.96),
              color = covariates, group = covariates))+
-  labs(title = "(A) Legalization program",x="",y="", color = "")+
+  labs(title = "(A) Legalization policy",x="",y="", color = "")+
   geom_errorbar(width = 0,position=position_dodge(width = 0.5), lwd = 0.3)+
   geom_point(size = 0.5,position=position_dodge(width = 0.5))+
   geom_hline(lwd = 0.5,yintercept = 0, lty =2, color = "black")+
@@ -616,7 +617,7 @@ p1_leg_placebos_gen <- readRDS("03_results/R01leg_Always_monitored_no_anticipati
 p2_MIB_placebos_gen <- readRDS("03_results/R02MIB_Always_monitored_no_anticipation_placebos.RDS")
 
 ## 8.2. Unir bases ----
-base <-rbind(p1_leg_placebos_gen[[2]] %>% mutate(Program = "Legalization program  "),
+base <-rbind(p1_leg_placebos_gen[[2]] %>% mutate(Program = "Legalization policy  "),
              p2_MIB_placebos_gen[[2]] %>% mutate(Program = "MIB program")) %>% 
   merge(outomes, by = "outcome", all.x = T) %>%
   filter(covariates == "conditional") %>% 
