@@ -1,4 +1,43 @@
-# Regresiones final
+# Regresiones fianles para el porgrama de legalización.
+
+
+# Descripción del Script:
+
+# ES:
+  # Este scrip corre el modelo de diferencias en diferencias dinámico 
+    # porpuesto en el artículo "Difference-in-differences with multiple 
+    # time periods."  (Callaway, B., & Sant’Anna, P. H. 2021)
+    
+    # El Script a) crea filtros sobre la base incial, b) construye para
+    # correr el modelo iterando sobre diferentes grupos de comparacion, 
+    # b) utiliza esta base para modelar en un loop con reporte y omisión 
+    # de errores, y c) finaliza alamecenado los resultados en una lista. 
+
+    # El proyecto buscó evaluar el impacto de las políticas de legalización
+    # de barrios y mejoramiento de barrios sobre el crecimiento informal de 
+    # la ciudad de Bogotá. El scrip es el correspondiente al análisis de el 
+    # efecto del porgrama de legalización.
+
+
+# EN: 
+  #This script runs the dynamic difference-in-difference model 
+    # proposed in the article "Difference-in-differences with multiple 
+    # time periods." (Callaway, B., & Sant'Anna, P.H. 2021)
+    
+    # The Script a) creates filters on the initial base, b) builds to run the 
+    # model iterating over different comparison groups, b) uses this base to 
+    # model in a loop with error reporting and omission, and c) ends by 
+    # storing the results in a list.
+
+    # The project sought to assess the impact of neighborhood legalization 
+    # and neighborhood upgrading policies on the informal growth of the city
+    # of Bogotá. The script corresponds to the analysis of the effect of the 
+    # legalization program.
+
+
+
+
+# Librerias
 library(stargazer)
 library(dplyr)
 library(ggplot2)
@@ -6,8 +45,10 @@ library(ggpubr)
 library(did)
 library(kableExtra)
 library(stringr)
-`%!in%` = Negate(`%in%`)
 
+# Complementos
+`%!in%` = Negate(`%in%`)
+set.seed(1994)
 
 
 # Notas metdológicas ----
@@ -96,9 +137,6 @@ iterations_placebos <-
   as.data.frame()
   
   #### C) Crear etiquetas de grupos de control (para la base de salida) ----
-
-
-
 
 
 
